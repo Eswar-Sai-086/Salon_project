@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Client Portal | VN Beauty Care</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600&family=Poppins:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        :root { --bg-color: #faf7f2; --text-main: #2c2c2c; --gold-accent: #d4af37; --card-bg: #ffffff; }
+        body { font-family: 'Poppins', sans-serif; background-color: var(--bg-color); height: 100vh; display: flex; justify-content: center; align-items: center; margin: 0; }
+        .login-card { background: var(--card-bg); padding: 50px 40px; border-radius: 12px; box-shadow: 0 15px 40px rgba(0,0,0,0.08); text-align: center; width: 100%; max-width: 350px; border-top: 4px solid var(--gold-accent); }
+        h1 { font-family: 'Playfair Display', serif; margin: 0 0 10px 0; color: var(--text-main); font-size: 2rem;}
+        p { color: #888; font-size: 0.9rem; margin-bottom: 20px; }
+        .toggle-btns { display: flex; margin-bottom: 30px; border-bottom: 1px solid #eee; }
+        .toggle-btn { flex: 1; padding: 10px; cursor: pointer; font-family: inherit; font-weight: 500; color: #888; border: none; background: none; font-size: 0.95rem; }
+        .toggle-btn.active { color: var(--gold-accent); border-bottom: 2px solid var(--gold-accent); }
+        .form-group { margin-bottom: 20px; text-align: left; }
+        label { font-size: 0.85rem; color: #555; font-weight: 500; display: block; margin-bottom: 5px; }
+        input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; font-family: inherit; transition: 0.3s; }
+        input:focus { outline: none; border-color: var(--gold-accent); }
+        .btn-submit { width: 100%; background: var(--text-main); color: #fff; padding: 15px; border: none; border-radius: 6px; cursor: pointer; font-size: 1rem; font-family: inherit; font-weight: 500; transition: 0.3s; margin-top: 10px; }
+        .btn-submit:hover { background: var(--gold-accent); }
+        .flash { color: #dc3545; font-size: 0.85rem; margin-bottom: 15px; }
+    </style>
+</head>
+<body>
+    <div class="login-card">
+        <h1>VN Beauty Care</h1>
+        <p>Client Portal</p>
+        {% with messages = get_flashed_messages() %}
+          {% if messages %} <div class="flash">{{ messages[0] }}</div> {% endif %}
+        {% endwith %}
+        <div class="toggle-btns">
+            <button class="toggle-btn active" onclick="showForm('login')">Login</button>
+            <button class="toggle-btn" onclick="showForm('register')">Sign Up</button>
+        </div>
+        <form method="POST" id="login-form">
+            <input type="hidden" name="action" value="login">
+            <div class="form-group"><label>Phone Number</label><input type="tel" name="phone" required></div>
+            <div class="form-group"><label>Password</label><input type="password" name="password" required></div>
+            <button type="submit" class="btn-submit">Login</button>
+        </form>
+        <form method="POST" id="register-form" style="display: none;">
+            <input type="hidden" name="action" value="register">
+            <div class="form-group"><label>Full Name</label><input type="text" name="full_name" required></div>
+            <div class="form-group"><label>Phone Number</label><input type="tel" name="phone" required></div>
+            <div class="form-group"><label>Create Password</label><input type="password" name="password" required></div>
+            <button type="submit" class="btn-submit">Register Account</button>
+        </form>
+    </div>
+    <script>
+        function showForm(type) {
+            document.getElementById('login-form').style.display = type === 'login' ? 'block' : 'none';
+            document.getElementById('register-form').style.display = type === 'register' ? 'block' : 'none';
+            const btns = document.querySelectorAll('.toggle-btn');
+            btns[0].className = type === 'login' ? 'toggle-btn active' : 'toggle-btn';
+            btns[1].className = type === 'register' ? 'toggle-btn active' : 'toggle-btn';
+        }
+    </script>
+</body>
+</html>

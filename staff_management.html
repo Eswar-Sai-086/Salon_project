@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Manage Staff | VN Beauty Care</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root { --bg-color: #faf7f2; --text-main: #2c2c2c; --gold-accent: #d4af37; --card-bg: #ffffff; --border-color: #eaddca; }
+        body { font-family: 'Poppins', sans-serif; background-color: var(--bg-color); color: var(--text-main); margin: 0; padding: 0; }
+        .admin-header { background-color: #1a1a1a; color: #fff; padding: 20px 40px; display: flex; justify-content: space-between; align-items: center; }
+        .admin-header h1 { font-family: 'Playfair Display', serif; margin: 0; font-size: 1.8rem; }
+        .header-links a { color: var(--gold-accent); text-decoration: none; font-size: 0.9rem; margin-left: 20px;}
+        .container { max-width: 1100px; margin: 40px auto; padding: 0 20px; }
+        .flash-msg { background-color: #fdfaf3; color: var(--text-main); border-left: 4px solid var(--gold-accent); padding: 15px 20px; border-radius: 4px; margin-bottom: 25px; font-weight: 500; display: flex; justify-content: space-between;}
+        .panel { background: var(--card-bg); padding: 30px; border-radius: 12px; box-shadow: 0 8px 20px rgba(0,0,0,0.04); margin-bottom: 30px; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; align-items: end;}
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; font-size: 0.85rem; margin-bottom: 6px; color: #555; }
+        .form-control { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-family: inherit; box-sizing: border-box; }
+        .btn-submit { background-color: var(--gold-accent); color: #fff; padding: 10px 15px; border: none; border-radius: 6px; cursor: pointer; width: 100%; transition: 0.3s; margin-bottom: 15px; font-weight: 500;}
+        .btn-delete { background-color: transparent; border: 1px solid #dc3545; color: #dc3545; padding: 6px 12px; border-radius: 4px; cursor: pointer; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
+        th, td { padding: 12px 10px; text-align: left; border-bottom: 1px solid var(--border-color); }
+    </style>
+</head>
+<body>
+    <header class="admin-header">
+        <h1>VN Beauty Care</h1>
+        <div class="header-links"><a href="/admin">← Back to POS</a> <a href="/logout">Logout</a></div>
+    </header>
+    <div class="container">
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}<div class="flash-msg"><span>{{ messages[0] }}</span></div>{% endif %}
+        {% endwith %}
+
+        <div class="panel">
+            <h2 style="font-family: 'Playfair Display', serif; margin-top:0;">Active Staff & Leave Balances</h2>
+            <p style="color: #666; font-size: 0.9rem; margin-top: -10px;">Leaves are automatically credited (+2 days) on the 1st of every month.</p>
+            <table>
+                <thead><tr><th>Name</th><th>Username</th><th>Leave Balance</th><th>Manual Adjust</th><th>Action</th></tr></thead>
+                <tbody>
+                    {% for person in staff %}
+                    <tr>
+                        <td><strong>{{ person['Staff_Name'] }}</strong></td><td>{{ person['Username'] }}</td>
+                        <td style="color: var(--gold-accent); font-weight: bold; font-size: 1.1rem;">{{ person['Leave_Balance'] }} Days</td>
+                        <td>
+                            <form method="POST" style="display:flex; gap: 5px; margin:0;">
+                                <input type="hidden" name="action" value="adjust_balance">
+                                <input type="hidden" name="staff_id" value="{{ person['Staff_ID'] }}">
+                                <input type="number" name="new_balance" value="{{ person['Leave_Balance'] }}" style="width: 50px; padding: 5px;">
+                                <button type="submit" style="padding: 5px; background: #eee; border: 1px solid #ccc; cursor: pointer;">Save</button>
+                            </form>
+                        </td>
+                        <td>
+                            <form method="POST" onsubmit="return confirm('Delete this user?');" style="margin:0;">
+                                <input type="hidden" name="action" value="delete"><input type="hidden" name="staff_id" value="{{ person['Staff_ID'] }}"><button type="submit" class="btn-delete">Remove</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="panel">
+            <h2 style="font-family: 'Playfair Display', serif; margin-top:0;">Create New Employee</h2>
+            <form method="POST">
+                <input type="hidden" name="action" value="add">
+                <div class="form-row">
+                    <div class="form-group"><label>Name</label><input type="text" name="new_staff_name" class="form-control" required></div>
+                    <div class="form-group"><label>Username</label><input type="text" name="new_staff_user" class="form-control" required></div>
+                    <div class="form-group"><label>Password (Unique)</label><input type="password" name="new_staff_pass" class="form-control" required></div>
+                </div>
+                <button type="submit" class="btn-submit" style="width:auto;">Create Account</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
