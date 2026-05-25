@@ -281,5 +281,5 @@ def print_invoice(invoice_number):
     if session.get('role') == 'customer' and invoice['Customer_Phone'] != session.get('customer_phone'): return "Unauthorized.", 403
     return render_template('invoice.html', invoice=invoice)
 
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=10000)
+if __name__ == '__main__':
+    app.run(debug=True, port=5000)
