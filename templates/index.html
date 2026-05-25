@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>VN Beauty Care | Premium Salon & Spa</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root { --bg-color: #faf7f2; --text-main: #2c2c2c; --gold-accent: #d4af37; --card-bg: #ffffff; --border-color: #eaddca; }
+        body { font-family: 'Poppins', sans-serif; background-color: var(--bg-color); color: var(--text-main); margin: 0; padding: 0; line-height: 1.6; }
+        .navbar { display: flex; justify-content: space-between; align-items: center; padding: 15px 40px; background-color: var(--card-bg); border-bottom: 1px solid var(--border-color); }
+        .nav-brand { font-family: 'Playfair Display', serif; font-size: 1.5rem; color: var(--text-main); font-weight: 600; text-decoration: none; letter-spacing: 1px;}
+        .dropdown { position: relative; display: inline-block; }
+        .dropbtn { background-color: transparent; color: var(--text-main); font-family: 'Poppins', sans-serif; font-size: 0.95rem; font-weight: 500; border: none; cursor: pointer; padding: 10px 15px; transition: color 0.3s; }
+        .dropbtn:hover { color: var(--gold-accent); }
+        .dropdown-content { display: none; position: absolute; right: 0; background-color: var(--card-bg); min-width: 180px; box-shadow: 0px 8px 20px rgba(0,0,0,0.08); z-index: 1; border-radius: 8px; border: 1px solid var(--border-color); overflow: hidden; }
+        .dropdown-content a { color: var(--text-main); padding: 12px 20px; text-decoration: none; display: block; font-size: 0.9rem; transition: 0.3s; }
+        .dropdown-content a:hover { background-color: var(--bg-color); color: var(--gold-accent); }
+        .dropdown:hover .dropdown-content { display: block; }
+        .hero { text-align: center; padding: 80px 20px 80px; background: linear-gradient(135deg, #ffffff 0%, #f4eee1 100%); border-bottom: 1px solid var(--border-color); }
+        .hero h1 { font-family: 'Playfair Display', serif; font-size: 4rem; margin-bottom: 15px; color: #1a1a1a; letter-spacing: 2px; }
+        .hero p { font-size: 1.1rem; color: #666; max-width: 600px; margin: 0 auto; font-weight: 300; }
+        .container { max-width: 1100px; margin: 80px auto; padding: 0 20px; }
+        .section-title { text-align: center; font-family: 'Playfair Display', serif; font-size: 2.2rem; margin-bottom: 50px; }
+        .section-title::after { content: ''; display: block; width: 50px; height: 2px; background-color: var(--gold-accent); margin: 15px auto 0; }
+        .services-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 30px; margin-bottom: 80px;}
+        .service-card { background: var(--card-bg); padding: 40px 30px; border-radius: 12px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.03); transition: transform 0.3s ease; border: 1px solid transparent; }
+        .service-card:hover { transform: translateY(-8px); box-shadow: 0 15px 40px rgba(0,0,0,0.08); border-color: #f0e6d2; }
+        .service-card h3 { font-family: 'Playfair Display', serif; font-size: 1.4rem; margin: 0; color: #222; }
+        .card-icon { font-size: 1.5rem; margin-bottom: 20px; color: var(--gold-accent); }
+        footer { text-align: center; padding: 60px 20px; background-color: #1a1a1a; color: #ffffff; }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="/" class="nav-brand">VN Beauty Care</a>
+        <div class="dropdown">
+            <button class="dropbtn">Login ▼</button>
+            <div class="dropdown-content">
+                <a href="/client/auth">Customer Portal</a>
+                <a href="/login">Staff Portal</a>
+            </div>
+        </div>
+    </nav>
+    <header class="hero">
+        <h1>VN Beauty Care</h1>
+        <p>Elevating your natural beauty with premium styling, exclusive treatments, and personalized care.</p>
+    </header>
+    <div class="container">
+        <h2 class="section-title">Our Signature Services</h2>
+        <div class="services-grid">
+            {% for service in services %}
+            <div class="service-card"><div class="card-icon">✧</div><h3>{{ service['Service_Name'] }}</h3></div>
+            {% endfor %}
+        </div>
+    </div>
+    <footer>
+        <p>&copy; 2026 VN Beauty Care | All Rights Reserved</p>
+    </footer>
+</body>
+</html>

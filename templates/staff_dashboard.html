@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Staff Portal | VN Beauty Care</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root { --bg-color: #faf7f2; --text-main: #2c2c2c; --gold-accent: #d4af37; --card-bg: #ffffff; --border-color: #eaddca; }
+        body { font-family: 'Poppins', sans-serif; background-color: var(--bg-color); color: var(--text-main); margin: 0; padding: 0; }
+        .admin-header { background-color: #1a1a1a; color: #fff; padding: 20px 40px; display: flex; justify-content: space-between; align-items: center; }
+        .admin-header h1 { font-family: 'Playfair Display', serif; margin: 0; font-size: 1.5rem; }
+        .header-links a { color: var(--gold-accent); text-decoration: none; font-size: 0.9rem; }
+        .container { max-width: 1200px; margin: 40px auto; padding: 0 20px; }
+        .content-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 30px;}
+        @media (max-width: 800px) { .content-grid { grid-template-columns: 1fr; } }
+        .panel { background: var(--card-bg); padding: 30px; border-radius: 12px; box-shadow: 0 8px 20px rgba(0,0,0,0.04); text-align: center; border-top: 4px solid var(--gold-accent); }
+        .panel-title { font-family: 'Playfair Display', serif; font-size: 1.5rem; margin-top: 0; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid var(--border-color); }
+        .metrics-grid { display: grid; grid-template-columns: 1fr; gap: 15px; margin-bottom: 20px;}
+        .metric-card { background: #fdfaf3; padding: 20px; border-radius: 8px; border: 1px solid var(--border-color); }
+        .metric-card h3 { font-size: 0.8rem; color: #888; text-transform: uppercase; margin: 0 0 5px 0; }
+        .metric-card h2 { font-family: 'Playfair Display', serif; font-size: 2.5rem; color: var(--gold-accent); margin: 0; }
+        #video-feed { width: 100%; border-radius: 8px; background-color: #000; margin-bottom: 20px; display: none; }
+        #canvas { display: none; }
+        
+        .btn-capture { width: 100%; background: var(--gold-accent); color: #fff; padding: 15px; border: none; border-radius: 6px; cursor: pointer; font-size: 1.1rem; font-family: inherit; font-weight: 500; transition: 0.3s; margin-top: 10px; display: none;}
+        .btn-start { width: 100%; background: var(--text-main); color: #fff; padding: 15px; border: none; border-radius: 6px; cursor: pointer; font-size: 1.1rem; font-family: inherit; margin-top: 10px; }
+        .btn-checkout { background: #dc3545; }
+        .btn-checkout:hover { background: #c82333; }
+        .shift-done { background: #f0f0f0; color: #888; border: 1px dashed #ccc; padding: 15px; border-radius: 6px; font-weight: 500;}
+
+        .status-text { font-size: 0.9rem; color: #888; margin-top: 15px; }
+        .flash { background: #d4edda; color: #155724; padding: 10px; border-radius: 6px; font-weight: 500; margin-bottom: 20px; border: 1px solid #c3e6cb;}
+        table { width: 100%; border-collapse: collapse; font-size: 0.9rem; margin-top: 10px; text-align: left; }
+        th, td { padding: 10px 5px; border-bottom: 1px solid var(--border-color); }
+        th { color: #888; font-size: 0.8rem; text-transform: uppercase; }
+        .form-group { text-align: left; margin-bottom: 15px; }
+        .form-group label { display: block; font-size: 0.85rem; color: #555; margin-bottom: 5px;}
+        .form-control { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-family: inherit; box-sizing: border-box; }
+    </style>
+</head>
+<body>
+    <header class="admin-header">
+        <h1>VN Beauty Care</h1>
+        <div class="header-links"><a href="/logout">Logout</a></div>
+    </header>
+
+    <div class="container">
+        <h2 style="font-family: 'Playfair Display', serif; font-size: 2.2rem; margin-bottom: 30px;">Welcome back, {{ session['staff_name'] }}!</h2>
+        
+        {% with messages = get_flashed_messages() %}
+            {% if messages %} <div class="flash">✅ {{ messages[0] }}</div> {% endif %}
+        {% endwith %}
+
+        <div class="content-grid">
+            <div class="panel">
+                <h2 class="panel-title">Daily Attendance</h2>
+                
+                {% if not today_log %}
+                    <p style="color: #666; font-size: 0.9rem; margin-bottom: 20px;">Ready to start your shift? Check in using your camera & GPS.</p>
+                    <button class="btn-start" id="start-btn" onclick="startVerification()">Clock In</button>
+                {% elif not today_log['Clock_Out'] %}
+                    <p style="color: #28a745; font-size: 0.9rem; margin-bottom: 20px; font-weight: bold;">You are currently clocked in.</p>
+                    <button class="btn-start btn-checkout" id="start-btn" onclick="startVerification()">Clock Out & End Shift</button>
+                {% else %}
+                    <div class="shift-done">Shift Completed Today. <br>Hours Logged: {{ today_log['Hours_Worked'] }} hours</div>
+                {% endif %}
+
+                <video id="video-feed" autoplay playsinline></video>
+                <canvas id="canvas"></canvas>
+                <p id="status" class="status-text"></p>
+
+                <form method="POST" id="attendance-form" style="display: none;">
+                    <input type="hidden" name="action_type" value="attendance">
+                    <input type="hidden" name="image_data" id="image_data">
+                    <input type="hidden" name="latitude" id="latitude">
+                    <input type="hidden" name="longitude" id="longitude">
+                    <button type="button" class="btn-capture" id="capture-btn" onclick="submitAttendance()">📸 Confirm Location</button>
+                </form>
+            </div>
+
+            <div class="panel">
+                <h2 class="panel-title">My Timesheet</h2>
+                <table>
+                    <thead><tr><th>Date</th><th>Clock In</th><th>Clock Out</th><th>Total Hours</th></tr></thead>
+                    <tbody>
+                        {% for log in timesheet %}
+                        <tr>
+                            <td style="font-weight: 500;">{{ log['Date'] }}</td>
+                            <td>{{ log['Clock_In'] | in_time }}</td>
+                            <td>{% if log['Clock_Out'] %}{{ log['Clock_Out'] | in_time }}{% else %}<span style="color:#28a745">Active</span>{% endif %}</td>
+                            <td style="color: var(--gold-accent); font-weight: bold;">{{ log['Hours_Worked'] }}h</td>
+                        </tr>
+                        {% else %}
+                        <tr><td colspan="4" style="text-align: center; color: #888; padding: 20px;">No shifts logged yet.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="content-grid">
+            <div class="panel">
+                <h2 class="panel-title">My Clients Today</h2>
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <h3>Total Clients Served Today</h3>
+                        <h2>{{ sales|length }}</h2>
+                    </div>
+                </div>
+                <table>
+                    <thead><tr><th>Time</th><th>Customer Name</th></tr></thead>
+                    <tbody>
+                        {% for sale in sales %}
+                        <tr>
+                            <td>{{ sale['Date_Time'] | in_time }}</td>
+                            <td style="font-weight: 500;">{{ sale['Customer_Name'] }}</td>
+                        </tr>
+                        {% else %}
+                        <tr><td colspan="2" style="text-align: center; color: #888; padding: 20px;">No clients served yet today.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="panel">
+                <h2 class="panel-title">Leaves & Time Off</h2>
+                <h3 style="margin: 0 0 20px 0; color: var(--gold-accent);">Current Balance: {{ balance }} Days</h3>
+                <form method="POST" style="margin-bottom: 30px;">
+                    <input type="hidden" name="action_type" value="leave">
+                    <div style="display: flex; gap: 10px;">
+                        <div class="form-group" style="flex:1;"><label>Start Date</label><input type="date" name="start_date" class="form-control" required></div>
+                        <div class="form-group" style="flex:1;"><label>End Date</label><input type="date" name="end_date" class="form-control" required></div>
+                    </div>
+                    <div class="form-group"><label>Reason</label><input type="text" name="reason" class="form-control" required placeholder="e.g. Sick Leave, Family Event"></div>
+                    <button type="submit" class="btn-start" style="background: var(--gold-accent);">Submit Leave Request</button>
+                </form>
+                
+                <h4 style="margin: 0 0 10px 0; color: #888; text-transform: uppercase; font-size: 0.8rem; text-align: left;">History</h4>
+                <table>
+                    <thead><tr><th>Dates</th><th>Reason</th><th>Status</th></tr></thead>
+                    <tbody>
+                        {% for leave in leaves %}
+                        <tr>
+                            <td style="font-size: 0.8rem;">{{ leave['Start_Date'] }} to {{ leave['End_Date'] }}</td>
+                            <td>{{ leave['Reason'] }}</td>
+                            <td><strong style="color: {% if leave['Status']=='Approved' %}green{% elif leave['Status']=='Rejected' %}red{% else %}#d4af37{% endif %};">{{ leave['Status'] }}</strong></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const video = document.getElementById('video-feed'), canvas = document.getElementById('canvas');
+        const startBtn = document.getElementById('start-btn'), captureBtn = document.getElementById('capture-btn');
+        const form = document.getElementById('attendance-form'), statusText = document.getElementById('status');
+        let lat = null, lon = null;
+        function startVerification() {
+            startBtn.style.display = 'none'; statusText.innerText = "Requesting Location & Camera access...";
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    pos => { lat = pos.coords.latitude; lon = pos.coords.longitude; document.getElementById('latitude').value = lat; document.getElementById('longitude').value = lon; startCamera(); },
+                    err => { statusText.innerText = "❌ Please allow Location access."; startBtn.style.display = 'block'; }
+                );
+            } else { statusText.innerText = "Geolocation not supported."; }
+        }
+        function startCamera() {
+            navigator.mediaDevices.getUserMedia({ video: true, audio: false }).then(stream => {
+                video.srcObject = stream; video.style.display = 'block'; captureBtn.style.display = 'block'; form.style.display = 'block'; statusText.innerText = "Ready. Face the camera.";
+            }).catch(err => { statusText.innerText = "❌ Please allow Camera access."; startBtn.style.display = 'block'; });
+        }
+        function submitAttendance() {
+            if (!lat || !lon) return;
+            canvas.width = video.videoWidth; canvas.height = video.videoHeight;
+            canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+            document.getElementById('image_data').value = canvas.toDataURL('image/jpeg', 0.8);
+            statusText.innerText = "Saving record..."; form.submit();
+        }
+    </script>
+</body>
+</html>
